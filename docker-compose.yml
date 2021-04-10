@@ -1,0 +1,20 @@
+version: '3'
+
+networks:
+  nginx_net:
+    external:
+      name: nginx_net
+
+
+services:
+  web:
+    container_name: "screenshots-api"
+    image: fumaz/screenshots-api-python
+    build: .
+    working_dir: /usr/src/app
+    networks:
+      - nginx_net
+    volumes:
+      - ./src:/usr/src/app
+      - ./images:/usr/src/app/images
+    command: python3 run.py
