@@ -28,7 +28,7 @@ def is_valid(file) -> bool:
 
 
 def random_filename() -> str:
-    return ''.join(random.choices(string.ascii_letters, k=6)) + config.FILE_EXTENSION
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=10)) + config.FILE_EXTENSION
 
 
 @app.post('/upload')
@@ -50,7 +50,7 @@ async def upload(request: Request):
 
     await write(image, path)
 
-    return json(dict(ok=True, url=config.DOMAIN + '/' + filename))
+    return json(dict(ok=True, url=config.DOMAIN + '/' + os.path.splitext(filename)[0]))
 
 
 @app.get('/<filename>')
@@ -58,7 +58,7 @@ async def fetch(request, filename: str):
     filename = secure_filename(filename)
 
     if not filename.endswith(config.FILE_EXTENSION):
-        return json(dict(ok=False, reason='not_found', message='404 Not Found'), status=404)
+        filename += config.FILE_EXTENSION
 
     path = os.path.join(config.UPLOAD_FOLDER, filename)
 
