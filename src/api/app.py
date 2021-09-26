@@ -23,8 +23,7 @@ async def write(file: File, path: str):
 
 
 def is_valid(file) -> bool:
-    return len(file.body) < config.FILE_MAX_SIZE \
-           and secure_filename(file.name).endswith(config.FILE_EXTENSION) and file.type == config.FILE_TYPE
+    return len(file.body) < config.FILE_MAX_SIZE and secure_filename(file.name).endswith(config.FILE_EXTENSION)
 
 
 def random_filename() -> str:
@@ -33,8 +32,8 @@ def random_filename() -> str:
 
 @app.post('/upload')
 async def upload(request: Request):
-    api_key: str = request.form.get('api_key', '')
-    image: File = request.files.get('image', None)
+    api_key: str = request.args.get('api_key', '')
+    image: File = list(request.files.values())[0][0]
 
     if api_key != config.API_KEY:
         return json(dict(ok=False, reason='api-key', message='Invalid API Key.'), status=403)
@@ -50,7 +49,7 @@ async def upload(request: Request):
 
     await write(image, path)
 
-    return json(dict(ok=True, url=config.DOMAIN + '/' + os.path.splitext(filename)[0]))
+    return json(dict(success=True, link=config.DOMAIN + '/' + os.path.splitext(filename)[0]))
 
 
 @app.get('/<filename>')
